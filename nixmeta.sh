@@ -26,9 +26,9 @@ read_meta () {
     nixpkgs_path=$(nix-shell -p nix-info --run "nix-info -m" | grep "nixpkgs: " | cut -d'`' -f2)
     nix-env -qa --meta --json -f "$nixpkgs_path" '.*' >meta.json
     # Print the header line
-    echo "\"pname\",\"version\",\"homepage\",\"spdxid\"" >"$OUT_FILE"
+    echo "\"pname\",\"version\",\"homepage\",\"spdxid\",\"maintainers\"" >"$OUT_FILE"
     # Query meta.json for the above mentioned fields
-    jq -cr 'keys[] as $k | "\"\(.[$k] | .pname)\",\"\(.[$k] | .version)\",\"\(.[$k] | .meta | .homepage // "" )\",\"\(.[$k] | .meta | .license | if type == "array" then [.[].spdxId? // ""] else [.spdxId? // ""] end | join(";"))\""' meta.json | 
+    jq -cr 'keys[] as $k | "\"\(.[$k] | .pname)\",\"\(.[$k] | .version)\",\"\(.[$k] | .meta | .homepage | if type == "array" then .[0] else . end )\",\"\(.[$k] | .meta | .license | if type == "array" then [.[].spdxId? // ""] else [.spdxId? // ""] end | join(";"))\",\"\(.[$k] | .meta | .maintainers | if type == "array" then [.[].email? // ""] else [.email? // ""] end | join(";"))\""' meta.json | 
     sort | uniq >>"$OUT_FILE"
 
 }
